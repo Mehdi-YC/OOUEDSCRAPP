@@ -4,9 +4,18 @@ import requests
 from bs4 import BeautifulSoup as bs
 import pandas as pd
 import tkinter as tk
+import threading
 
-
-
+def loading():
+    window = Tk()
+    window.attributes('-disabled', True)
+    screen_width =  window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    window.title('Loading...')
+    window.geometry("280x0+%d+%d" %
+                    (screen_width/2-275, screen_height/2-125))
+    window.lift()
+    window.mainloop()
 
 class TestApp(Frame):
     """Basic test frame for the table"""
@@ -24,7 +33,7 @@ class TestApp(Frame):
 
         frame1.pack()
 
-        self.main.title('Table app')
+        self.main.title('OUEDKNISS')
         f = Frame(self.main)
         f.pack(fill=BOTH, expand=1)
 
@@ -35,6 +44,8 @@ class TestApp(Frame):
         return
 
     def scrapIt(self):
+        thread = threading.Thread(target=loading)
+        thread.start()
         url = f"https://www.ouedkniss.com/{self.sv.get()}-r"
         #url = f"https://www.ouedkniss.com/ps4-r"
         r = requests.get(url)
@@ -96,17 +107,17 @@ class TestApp(Frame):
                         #print('titre ', titres)
                         #print('num ', nums)
                     except:
-                        print('no data')
+                        pass
+                        #print('no data')
                 else:
                     pass
                 x += 1
-            print('--------------')
+            #print('--------------')
         df = pd.DataFrame(list(zip(noms, titres, wilayas, links)),
                         columns=['NOM', 'Titre', 'Wilaya', 'NUM'])
         df = df.drop_duplicates(subset=["NOM", "NUM"])
         df.to_csv(f"{self.sv.get()}.csv", index=False)
-        #print(dir(self.table))
         self.table.importCSV(f"{self.sv.get()}.csv")
-        
+        thread.join()
 TestApp()
 
